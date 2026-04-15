@@ -1,0 +1,113 @@
+local HttpService = game:GetService("HttpService")
+local TeleportService = game:GetService("TeleportService")
+local UserInputService = game:GetService("UserInputService")
+local PlaceId = 104715542330896
+
+-- ניקוי שאריות שלא יתקע
+if game.CoreGui:FindFirstChild("Manik_Ultra_Final") then
+    game.CoreGui.Manik_Ultra_Final:Destroy()
+end
+
+local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
+ScreenGui.Name = "Manik_Ultra_Final"
+ScreenGui.ResetOnSpawn = false
+
+-- פונקציית גרירה בטוחה (בלי אנימציות)
+local function drag(frame)
+    local dragging, dragInput, dragStart, startPos
+    frame.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true; dragStart = input.Position; startPos = frame.Position
+        end
+    end)
+    UserInputService.InputChanged:Connect(function(input)
+        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+            local delta = input.Position - dragStart
+            frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        end
+    end)
+    UserInputService.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end
+    end)
+end
+
+-- === 1. לאנצ'ר (מסך הבחירה) ===
+local Launcher = Instance.new("Frame", ScreenGui)
+Launcher.Size = UDim2.new(0, 350, 0, 430)
+Launcher.Position = UDim2.new(0.5, -175, 0.5, -215)
+Launcher.BackgroundColor3 = Color3.fromRGB(15, 15, 18)
+Instance.new("UICorner", Launcher).CornerRadius = UDim.new(0, 15)
+local LStroke = Instance.new("UIStroke", Launcher)
+LStroke.Color = Color3.fromRGB(180, 0, 255); LStroke.Thickness = 3
+drag(Launcher)
+
+local LTitle = Instance.new("TextLabel", Launcher)
+LTitle.Size = UDim2.new(1, 0, 0, 60); LTitle.Text = "בחר אקזקיוטור יא מאניק"; LTitle.TextColor3 = Color3.new(1,1,1); LTitle.TextSize = 20; LTitle.Font = Enum.Font.SourceSansBold; LTitle.BackgroundTransparency = 1
+
+local ExecScroll = Instance.new("ScrollingFrame", Launcher)
+ExecScroll.Size = UDim2.new(0.85, 0, 0.45, 0); ExecScroll.Position = UDim2.new(0.075, 0, 0.2, 0); ExecScroll.BackgroundColor3 = Color3.fromRGB(25, 25, 30); ExecScroll.BorderSizePixel = 0; ExecScroll.CanvasSize = UDim2.new(0,0,1.5,0)
+Instance.new("UIListLayout", ExecScroll).Padding = UDim.new(0, 5)
+
+local executors = {"Xeno", "Delta", "Arceus X", "Codex", "Hydrogen", "Solara", "Wave"}
+for _, name in ipairs(executors) do
+    local b = Instance.new("TextButton", ExecScroll)
+    b.Size = UDim2.new(0.95, 0, 0, 35); b.Text = name; b.BackgroundColor3 = Color3.fromRGB(40, 40, 50); b.TextColor3 = Color3.new(1,1,1); b.Font = Enum.Font.SourceSans; Instance.new("UICorner", b)
+    b.MouseButton1Click:Connect(function() LTitle.Text = "נבחר: "..name; LTitle.TextColor3 = Color3.new(0,1,0) end)
+end
+
+local InjectBtn = Instance.new("TextButton", Launcher)
+InjectBtn.Size = UDim2.new(0.85, 0, 0, 60); InjectBtn.Position = UDim2.new(0.075, 0, 0.75, 0); InjectBtn.Text = "הזרק ובוא נצוד"; InjectBtn.BackgroundColor3 = Color3.fromRGB(180, 0, 255); InjectBtn.TextColor3 = Color3.new(1,1,1); InjectBtn.Font = Enum.Font.SourceSansBold; InjectBtn.TextSize = 22; Instance.new("UICorner", InjectBtn)
+
+-- === 2. מניו צייד (המסך השני) ===
+local Main = Instance.new("Frame", ScreenGui)
+Main.Visible = false
+Main.Size = UDim2.new(0, 400, 0, 300)
+Main.Position = UDim2.new(0.5, -200, 0.5, -150)
+Main.BackgroundColor3 = Color3.fromRGB(12, 12, 12)
+Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 15)
+local MStroke = Instance.new("UIStroke", Main); MStroke.Color = Color3.fromRGB(180, 0, 255); MStroke.Thickness = 3
+drag(Main)
+
+local Close = Instance.new("TextButton", Main)
+Close.Size = UDim2.new(0, 40, 0, 40); Close.Position = UDim2.new(1, -45, 0, 5); Close.Text = "X"; Close.TextColor3 = Color3.new(1,0,0); Close.BackgroundTransparency = 1; Close.TextSize = 30; Close.MouseButton1Click:Connect(function() ScreenGui:Destroy() end)
+
+local Status = Instance.new("TextLabel", Main)
+Status.Size = UDim2.new(1, 0, 0, 50); Status.Position = UDim2.new(0, 0, 0.2, 0); Status.Text = "מצב: מאניק מוכן"; Status.TextColor3 = Color3.fromRGB(180, 0, 255); Status.Font = Enum.Font.SourceSansBold; Status.TextSize = 20; Status.BackgroundTransparency = 1
+
+local HuntBtn = Instance.new("TextButton", Main)
+HuntBtn.Size = UDim2.new(0.85, 0, 0, 90); HuntBtn.Position = UDim2.new(0.075, 0, 0.5, 0); HuntBtn.Text = "חפש שרת (2-6)"; HuntBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30); HuntBtn.TextColor3 = Color3.new(1,1,1); HuntBtn.Font = Enum.Font.SourceSansBold; HuntBtn.TextSize = 24; Instance.new("UICorner", HuntBtn)
+Instance.new("UIStroke", HuntBtn).Color = Color3.fromRGB(180, 0, 255)
+
+-- לוגיקת מעבר (בלי אנימציות בכלל)
+InjectBtn.MouseButton1Click:Connect(function()
+    Launcher.Visible = false
+    Main.Visible = true
+end)
+
+-- לוגיקת צייד
+HuntBtn.MouseButton1Click:Connect(function()
+    HuntBtn.Interactable = false
+    Status.Text = "חופר בשרתים..."
+    task.spawn(function()
+        local url = "https://games.roblox.com/v1/games/" .. PlaceId .. "/servers/Public?sortOrder=Asc&limit=100"
+        local s, r = pcall(function() return game:HttpGet(url) end)
+        if s then
+            local data = HttpService:JSONDecode(r)
+            local target = nil
+            for _, v in ipairs(data.data) do
+                if v.playing >= 2 and v.playing <= 6 and v.id ~= game.JobId then target = v; break end
+            end
+            if target then
+                for i = 5, 1, -1 do
+                    Status.Text = "טס לשם בעוד: " .. i
+                    task.wait(1)
+                end
+                TeleportService:TeleportToPlaceInstance(PlaceId, target.id)
+            else
+                Status.Text = "אין שרתים, נסה שוב"; task.wait(2); HuntBtn.Interactable = true; Status.Text = "מצב: מאניק מוכן"
+            end
+        else
+            Status.Text = "שגיאת חיבור"; task.wait(2); HuntBtn.Interactable = true
+        end
+    end)
+end)
